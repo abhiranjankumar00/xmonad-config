@@ -16,6 +16,7 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
+import XMonad.Wallpaper
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
 
@@ -25,14 +26,16 @@ import qualified Data.Map        as M
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal = "/usr/bin/gnome-terminal"
+myTerminal :: String
+myTerminal = "/usr/bin/terminator"
 
 
 ------------------------------------------------------------------------
 -- Workspaces
 -- The default number of workspaces (virtual screens) and their names.
 --
-myWorkspaces = ["1:term","2:web","3:code","4:vm","5:media"] ++ map show [6..9]
+myWorkspaces :: [String]
+myWorkspaces = ["1:term","2:web","3:vm","4:media"] ++ map show [(5::Int)..9]
 
 
 ------------------------------------------------------------------------
@@ -50,16 +53,17 @@ myWorkspaces = ["1:term","2:web","3:code","4:vm","5:media"] ++ map show [6..9]
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-    [ className =? "Chromium"       --> doShift "2:web"
-    , className =? "Google-chrome"  --> doShift "2:web"
+    [ --className =? "Terminator"     --> doShift "1:term"
+      className =? "Chromium"       --> doShift "2:web"
+    -- , className =? "Google-chrome"  --> doShift "2:web"
     , resource  =? "desktop_window" --> doIgnore
     , className =? "Galculator"     --> doFloat
     , className =? "Steam"          --> doFloat
     , className =? "Gimp"           --> doFloat
     , resource  =? "gpicview"       --> doFloat
     , className =? "MPlayer"        --> doFloat
-    , className =? "VirtualBox"     --> doShift "4:vm"
-    , className =? "Xchat"          --> doShift "5:media"
+    , className =? "VirtualBox"     --> doShift "3:vm"
+    , className =? "Xchat"          --> doShift "4:media"
     , className =? "stalonetray"    --> doIgnore
     , isFullscreen --> (doF W.focusDown <+> doFullFloat)]
 
@@ -87,10 +91,14 @@ myLayout = avoidStruts (
 -- Colors and borders
 -- Currently based on the ir_black theme.
 --
+myNormalBorderColor :: String
 myNormalBorderColor  = "#7c7c7c"
-myFocusedBorderColor = "#ffb6b0"
+myFocusedBorderColor :: String
+--myFocusedBorderColor = "#ffb6b0"
+myFocusedBorderColor = "#ff0000"
 
 -- Colors for text and backgrounds of each tab when in "Tabbed" layout.
+tabConfig :: Theme
 tabConfig = defaultTheme {
     activeBorderColor = "#7C7C7C",
     activeTextColor = "#CEFFAC",
@@ -101,13 +109,16 @@ tabConfig = defaultTheme {
 }
 
 -- Color of current window title in xmobar.
+xmobarTitleColor :: String
 xmobarTitleColor = "#FFB6B0"
 
 -- Color of current workspace in xmobar.
-xmobarCurrentWorkspaceColor = "#CEFFAC"
+xmobarCurrentWorkspaceColor :: String
+xmobarCurrentWorkspaceColor = "#00aeff"
 
 -- Width of the window border in pixels.
-myBorderWidth = 1
+myBorderWidth :: Dimension
+myBorderWidth = 3
 
 
 ------------------------------------------------------------------------
@@ -118,8 +129,10 @@ myBorderWidth = 1
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask = mod1Mask
+myModMask :: KeyMask
+myModMask = mod4Mask
 
+myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   ----------------------------------------------------------------------
   -- Custom key bindings
@@ -130,12 +143,17 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
      spawn $ XMonad.terminal conf)
 
   -- Lock the screen using xscreensaver.
-  , ((modMask .|. controlMask, xK_l),
+  , ((modMask .|. shiftMask, xK_l),
      spawn "xscreensaver-command -lock")
+
+  -- Launch dmenu
+  -- Use this to launch programs without a key binding.
+  , ((modMask, xK_p),
+     spawn "dmenu_run")
 
   -- Launch dmenu via yeganesh.
   -- Use this to launch programs without a key binding.
-  , ((modMask, xK_p),
+  , ((modMask, xK_o),
      spawn "yeganesh -x -- -fn '-*-terminus-*-r-normal-*-*-120-*-*-*-*-iso8859-*' -nb '#000000' -nf '#FFFFFF' -sb '#7C7C7C' -sf '#CEFFAC'")
 
   -- Take a screenshot in select mode.
@@ -156,15 +174,15 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   -- Mute volume.
   , ((modMask .|. controlMask, xK_m),
-     spawn "amixer -q set Master toggle")
+     spawn "amixer -q -D pulse set Master toggle")
 
   -- Decrease volume.
   , ((modMask .|. controlMask, xK_j),
-     spawn "amixer -q set Master 10%-")
+     spawn "amixer -q -D pulse set Master 10%-")
 
   -- Increase volume.
   , ((modMask .|. controlMask, xK_k),
-     spawn "amixer -q set Master 10%+")
+     spawn "amixer -q -D pulse set Master 10%+")
 
   -- Audio previous.
   , ((0, 0x1008FF16),
@@ -285,6 +303,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
+myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
 myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
   [
     -- mod-button1, Set the window to floating mode and move by dragging
@@ -321,14 +340,17 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
+myStartupHook :: X ()
 myStartupHook = return ()
 
 
 ------------------------------------------------------------------------
 -- Run xmonad with all the defaults we set up.
 --
+main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
+  setRandomWallpaper ["$HOME/Pictures/Wallpapers"]
   xmonad $ defaults {
       logHook = dynamicLogWithPP $ xmobarPP {
             ppOutput = hPutStrLn xmproc
