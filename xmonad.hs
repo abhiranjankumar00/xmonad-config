@@ -35,7 +35,7 @@ myTerminal = "/usr/bin/terminator"
 -- The default number of workspaces (virtual screens) and their names.
 --
 myWorkspaces :: [String]
-myWorkspaces = ["1:term","2:web","3:vm","4:media"] ++ map show [(5::Int)..9]
+myWorkspaces = ["1:term","2:web","3:media","4:vm"] ++ map show [(5::Int)..9]
 
 
 ------------------------------------------------------------------------
@@ -62,8 +62,8 @@ myManageHook = composeAll
     , className =? "Gimp"           --> doFloat
     , resource  =? "gpicview"       --> doFloat
     , className =? "MPlayer"        --> doFloat
-    , className =? "VirtualBox"     --> doShift "3:vm"
-    , className =? "Xchat"          --> doShift "4:media"
+    , className =? "VirtualBox"     --> doShift "4:vm"
+    , className =? "Xchat"          --> doShift "3:media"
     , className =? "stalonetray"    --> doIgnore
     , isFullscreen --> (doF W.focusDown <+> doFullFloat)]
 
