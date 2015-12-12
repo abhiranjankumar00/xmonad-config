@@ -7,6 +7,7 @@ import System.Exit
 import XMonad
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
+import XMonad.Util.Scratchpad
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Fullscreen
@@ -35,7 +36,7 @@ myTerminal = "/usr/bin/terminator"
 -- The default number of workspaces (virtual screens) and their names.
 --
 myWorkspaces :: [String]
-myWorkspaces = ["1:term","2:web","3:media","4:vm"] ++ map show [(5::Int)..9]
+myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:misc"] ++ map show [(6::Int)..9]
 
 
 ------------------------------------------------------------------------
@@ -52,20 +53,33 @@ myWorkspaces = ["1:term","2:web","3:media","4:vm"] ++ map show [(5::Int)..9]
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
-myManageHook = composeAll
-    [ --className =? "Terminator"     --> doShift "1:term"
-      className =? "Chromium"       --> doShift "2:web"
-    -- , className =? "Google-chrome"  --> doShift "2:web"
-    , resource  =? "desktop_window" --> doIgnore
-    , className =? "Galculator"     --> doFloat
-    , className =? "Steam"          --> doFloat
-    , className =? "Gimp"           --> doFloat
-    , resource  =? "gpicview"       --> doFloat
-    , className =? "MPlayer"        --> doFloat
-    , className =? "VirtualBox"     --> doShift "4:vm"
-    , className =? "Xchat"          --> doShift "3:media"
-    , className =? "stalonetray"    --> doIgnore
-    , isFullscreen --> (doF W.focusDown <+> doFullFloat)]
+myManageHook =
+    (composeAll
+        [ --className =? "Terminator"     --> doShift "1:term"
+        className =? "Chromium"       --> doShift "2:web"
+        -- , className =? "Google-chrome"  --> doShift "2:web"
+        , resource  =? "desktop_window" --> doIgnore
+        , className =? "Galculator"     --> doFloat
+        , className =? "Steam"          --> doFloat
+        , className =? "Gimp"           --> doFloat
+        , resource  =? "gpicview"       --> doFloat
+        , className =? "MPlayer"        --> doFloat
+        , className =? "VirtualBox"     --> doShift "4:vm"
+        , className =? "Xchat"          --> doShift "3:media"
+        , className =? "stalonetray"    --> doIgnore
+        , isFullscreen --> (doF W.focusDown <+> doFullFloat)
+        ]
+    ) <+> manageScratchPad
+
+-- then define your scratchpad management separately:
+manageScratchPad :: ManageHook
+manageScratchPad = scratchpadManageHook (W.RationalRect l t w h)
+  where
+    h = 0.1     -- terminal height, 10%
+    w = 1       -- terminal width, 100%
+    t = 1 - h   -- distance from top edge, 90%
+    l = 1 - w   -- distance from left edge, 0%
+
 
 
 ------------------------------------------------------------------------
@@ -79,12 +93,13 @@ myManageHook = composeAll
 -- which denotes layout choice.
 --
 myLayout = avoidStruts (
-    Tall 1 (3/100) (1/2) |||
-    Mirror (Tall 1 (3/100) (1/2)) |||
-    tabbed shrinkText tabConfig |||
-    Full |||
-    spiral (6/7)) |||
-    noBorders (fullscreenFull Full)
+      tabbed shrinkText tabConfig
+      ||| Tall 1 (3/100) (1/2)
+      ||| Mirror (Tall 1 (3/100) (1/2))
+      -- ||| Full
+      -- ||| spiral (6/7)
+    )
+    ||| noBorders (fullscreenFull Full)
 
 
 ------------------------------------------------------------------------
@@ -178,6 +193,10 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   -- Increase volume.
   , ((modMask .|. controlMask, xK_k),
      spawn "amixer -q -D pulse set Master 10%+")
+
+  -- Launch scarthpad
+  , ((modMask, xK_y),
+     scratchPad)
 
   -- Audio previous.
   , ((0, 0x1008FF16),
@@ -288,6 +307,9 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
       | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
       , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
+    where
+        scratchPad = scratchpadSpawnActionTerminal myTerminal
+
 
 
 ------------------------------------------------------------------------
