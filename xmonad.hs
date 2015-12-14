@@ -53,8 +53,7 @@ myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:misc"] ++ map show [(6::In
 -- To match on the WM_NAME, you can use 'title' in the same way that
 -- 'className' and 'resource' are used below.
 --
-myManageHook =
-    (composeAll
+myManageHook = composeAll
         [ --className =? "Terminator"     --> doShift "1:term"
         className =? "Chromium"       --> doShift "2:web"
         -- , className =? "Google-chrome"  --> doShift "2:web"
@@ -69,7 +68,6 @@ myManageHook =
         , className =? "stalonetray"    --> doIgnore
         , isFullscreen --> (doF W.focusDown <+> doFullFloat)
         ]
-    ) <+> manageScratchPad
 
 -- then define your scratchpad management separately:
 manageScratchPad :: ManageHook
@@ -287,7 +285,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   -- Quit xmonad.
   , ((modMask .|. shiftMask, xK_q),
-     io (exitWith ExitSuccess))
+     io exitSuccess)
 
   -- Restart xmonad.
   , ((modMask, xK_q),
@@ -321,19 +319,19 @@ myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
 myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
+myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
   [
     -- mod-button1, Set the window to floating mode and move by dragging
     ((modMask, button1),
-     (\w -> focus w >> mouseMoveWindow w))
+     \w -> focus w >> mouseMoveWindow w)
 
     -- mod-button2, Raise the window to the top of the stack
     , ((modMask, button2),
-       (\w -> focus w >> windows W.swapMaster))
+       \w -> focus w >> windows W.swapMaster)
 
     -- mod-button3, Set the window to floating mode and resize by dragging
     , ((modMask, button3),
-       (\w -> focus w >> mouseResizeWindow w))
+       \w -> focus w >> mouseResizeWindow w)
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
   ]
@@ -403,7 +401,7 @@ defaults = defaultConfig {
     mouseBindings      = myMouseBindings,
 
     -- hooks, layouts
-    layoutHook         = smartBorders $ myLayout,
+    layoutHook         = smartBorders myLayout,
     manageHook         = myManageHook,
     startupHook        = myStartupHook
 }
