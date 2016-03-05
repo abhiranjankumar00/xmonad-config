@@ -54,9 +54,9 @@ myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:misc"] ++ map show [(6::In
 -- 'className' and 'resource' are used below.
 --
 myManageHook = composeAll
-        [ --className =? "Terminator"     --> doShift "1:term"
-        className =? "Chromium"       --> doShift "2:web"
-        -- , className =? "Google-chrome"  --> doShift "2:web"
+        [ className =? "Terminator"     --> doShift "1:term"
+        , className =? "Chromium"       --> doShift "2:web"
+        , className =? "Google-chrome"  --> doShift "2:web"
         , resource  =? "desktop_window" --> doIgnore
         , className =? "Galculator"     --> doFloat
         , className =? "Steam"          --> doFloat

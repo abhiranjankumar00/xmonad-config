@@ -27,6 +27,9 @@ fi
 # Set brightness percentage
 xbacklight -set 30 &
 
+# Start menu launcher
+albert &
+
 # show battery status in tray
 xfce4-power-manager &
 
@@ -43,5 +46,14 @@ xscreensaver -no-splash &
 
 # Start sound server
 pulseaudio --start &
+
+# Starts dropbox
+dropbox start &
+
+# Starts scudcloud in minimized to tray
+scudcloud --minimized MINIMIZED &
+
+# Starts ssh-agent
+#ssh-agent xmonad
 
 exec ck-launch-session dbus-launch --sh-syntax --exit-with-session xmonad
