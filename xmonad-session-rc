@@ -1,0 +1,51 @@
+#!/bin/sh
+# Script to configure X, start common apps, and start xmonad.
+# Author: Vic Fryzel
+# http://github.com/vicfryzel/xmonad-config
+
+
+# Configure PATH so that we can access our scripts below
+export PATH="$PATH:~/.xmonad/bin"
+
+# Configure X
+xsetroot -cursor_name left_ptr &
+#xrdb -merge ~/.Xdefaults &
+#setxkbmap -option "ctrl:nocaps" &
+
+# Start a window compositor. This ensures Google Chrome paints correctly.
+xcompmgr -n &
+
+# Start the system tray
+tray &
+
+# Show network manager icon in tray
+if [ -x /usr/bin/nm-applet ] ; then
+    nm-applet --sm-disable &
+fi
+
+# Starts dropbox
+dropbox start &
+
+# Set brightness percentage
+#xbacklight -set 30 &
+
+# Start menu launcher
+albert &
+
+# show battery status in tray
+xfce4-power-manager &
+
+# Start two terminals
+#gnome-terminal &
+#gnome-terminal &
+
+# Start a browser
+#google-chrome &
+
+# Start screensaver
+gnome-screensaver &
+
+# Start sound server
+pulseaudio --start --log-target=syslog &
+
+#gnome-session &

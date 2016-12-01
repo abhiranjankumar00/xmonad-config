@@ -7,7 +7,6 @@ import System.Exit
 import XMonad
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
-import XMonad.Util.Scratchpad
 import XMonad.Hooks.ManageHelpers
 import XMonad.Hooks.SetWMName
 import XMonad.Layout.Fullscreen
@@ -17,6 +16,7 @@ import XMonad.Layout.Tabbed
 import XMonad.Layout.ThreeColumns
 import XMonad.Util.Run(spawnPipe)
 import XMonad.Util.EZConfig(additionalKeys)
+import Graphics.X11.ExtraTypes.XF86
 import XMonad.Wallpaper
 import qualified XMonad.StackSet as W
 import qualified Data.Map        as M
@@ -27,8 +27,22 @@ import qualified Data.Map        as M
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
 --
-myTerminal :: String
-myTerminal = "/usr/bin/terminator"
+myTerminal = "/usr/bin/gnome-terminal"
+-- myTerminal = "/usr/bin/terminator"
+
+-- The command to lock the screen or show the screensaver.
+myScreensaver = "/usr/bin/gnome-screensaver-command --lock"
+
+-- The command to take a selective screenshot, where you select
+-- what you'd like to capture on the screen.
+mySelectScreenshot = "select-screenshot"
+
+-- The command to take a fullscreen screenshot.
+myScreenshot = "screenshot"
+
+-- The command to use as a launcher, to launch commands that don't have
+-- preset keybindings.
+myLauncher = "$(yeganesh -x -- -fn '-*-terminus-*-r-normal-*-*-120-*-*-*-*-iso8859-*')"
 
 
 ------------------------------------------------------------------------
@@ -69,16 +83,6 @@ myManageHook = composeAll
         , isFullscreen --> (doF W.focusDown <+> doFullFloat)
         ]
 
--- then define your scratchpad management separately:
-manageScratchPad :: ManageHook
-manageScratchPad = scratchpadManageHook (W.RationalRect l t w h)
-  where
-    h = 0.1     -- terminal height, 10%
-    w = 1       -- terminal width, 100%
-    t = 1 - h   -- distance from top edge, 90%
-    l = 1 - w   -- distance from left edge, 0%
-
-
 
 ------------------------------------------------------------------------
 -- Layouts
@@ -94,6 +98,7 @@ myLayout = avoidStruts (
       tabbed shrinkText tabConfig
       ||| Tall 1 (3/100) (1/2)
       ||| Mirror (Tall 1 (3/100) (1/2))
+      -- ||| ThreeColMid 1 (3/100) (1/2)
       -- ||| Full
       -- ||| spiral (6/7)
     )
@@ -122,15 +127,13 @@ tabConfig = defaultTheme {
 }
 
 -- Color of current window title in xmobar.
-xmobarTitleColor :: String
 xmobarTitleColor = "#FFB6B0"
 
 -- Color of current workspace in xmobar.
-xmobarCurrentWorkspaceColor :: String
 xmobarCurrentWorkspaceColor = "#00aeff"
+--xmobarCurrentWorkspaceColor = "#CEFFAC"
 
 -- Width of the window border in pixels.
-myBorderWidth :: Dimension
 myBorderWidth = 3
 
 
@@ -142,10 +145,8 @@ myBorderWidth = 3
 -- ("right alt"), which does not conflict with emacs keybindings. The
 -- "windows key" is usually mod4Mask.
 --
-myModMask :: KeyMask
 myModMask = mod4Mask
 
-myKeys :: XConfig Layout -> M.Map (KeyMask, KeySym) (X ())
 myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   ----------------------------------------------------------------------
   -- Custom key bindings
@@ -155,30 +156,36 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   [ ((modMask .|. shiftMask, xK_Return),
      spawn $ XMonad.terminal conf)
 
-  -- Lock the screen using xscreensaver.
+  -- Lock the screen using command specified by myScreensaver.
   , ((modMask .|. shiftMask, xK_l),
-     spawn "xscreensaver-command -lock")
+     spawn myScreensaver)
 
-  -- Launch dmenu via yeganesh.
+  -- Spawn the launcher using command specified by myLauncher.
   -- Use this to launch programs without a key binding.
   , ((modMask, xK_p),
-     spawn "$(yeganesh -x -- -fn '-*-terminus-*-r-normal-*-*-120-*-*-*-*-iso8859-*' -nb '#000000' -nf '#FFFFFF' -sb '#7C7C7C' -sf '#CEFFAC')")
+     spawn myLauncher)
+  , ((modMask, xK_z),
+     spawn myLauncher)
 
-  -- Take a screenshot in select mode.
-  -- After pressing this key binding, click a window, or draw a rectangle with
-  -- the mouse.
+  -- Take a selective screenshot using the command specified by mySelectScreenshot.
   , ((modMask .|. shiftMask, xK_p),
-     spawn "select-screenshot")
+     spawn mySelectScreenshot)
 
-  -- Take full screenshot in multi-head mode.
-  -- That is, take a screenshot of everything you see.
+  -- Take a full screenshot using the command specified by myScreenshot.
   , ((modMask .|. controlMask .|. shiftMask, xK_p),
-     spawn "screenshot")
+     spawn myScreenshot)
 
-  -- Fetch a single use password.
-  , ((modMask .|. shiftMask, xK_o),
-     spawn "fetchotp -x")
+  -- Mute volume.
+  , ((0, xF86XK_AudioMute),
+     spawn "amixer -q -D pulse set Master toggle")
 
+  -- Decrease volume.
+  , ((0, xF86XK_AudioLowerVolume),
+     spawn "amixer -q -D pulse set Master 10%-")
+
+  -- Increase volume.
+  , ((0, xF86XK_AudioRaiseVolume),
+     spawn "amixer -q -D pulse set Master 10%+")
 
   -- Mute volume.
   , ((modMask .|. controlMask, xK_m),
@@ -191,10 +198,6 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   -- Increase volume.
   , ((modMask .|. controlMask, xK_k),
      spawn "amixer -q -D pulse set Master 10%+")
-
-  -- Launch scarthpad
-  , ((modMask, xK_y),
-     scratchPad)
 
   -- Audio previous.
   , ((0, 0x1008FF16),
@@ -285,7 +288,7 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 
   -- Quit xmonad.
   , ((modMask .|. shiftMask, xK_q),
-     io exitSuccess)
+     io (exitWith ExitSuccess))
 
   -- Restart xmonad.
   , ((modMask, xK_q),
@@ -305,9 +308,6 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
   [((m .|. modMask, key), screenWorkspace sc >>= flip whenJust (windows . f))
       | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
       , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
-    where
-        scratchPad = scratchpadSpawnActionTerminal myTerminal
-
 
 
 ------------------------------------------------------------------------
@@ -318,20 +318,19 @@ myKeys conf@(XConfig {XMonad.modMask = modMask}) = M.fromList $
 myFocusFollowsMouse :: Bool
 myFocusFollowsMouse = True
 
-myMouseBindings :: XConfig t -> M.Map (KeyMask, Button) (Window -> X ())
-myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
+myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList $
   [
     -- mod-button1, Set the window to floating mode and move by dragging
     ((modMask, button1),
-     \w -> focus w >> mouseMoveWindow w)
+     (\w -> focus w >> mouseMoveWindow w))
 
     -- mod-button2, Raise the window to the top of the stack
     , ((modMask, button2),
-       \w -> focus w >> windows W.swapMaster)
+       (\w -> focus w >> windows W.swapMaster))
 
     -- mod-button3, Set the window to floating mode and resize by dragging
     , ((modMask, button3),
-       \w -> focus w >> mouseResizeWindow w)
+       (\w -> focus w >> mouseResizeWindow w))
 
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
   ]
@@ -355,14 +354,12 @@ myMouseBindings (XConfig {XMonad.modMask = modMask}) = M.fromList
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
-myStartupHook :: X ()
 myStartupHook = return ()
 
 
 ------------------------------------------------------------------------
 -- Run xmonad with all the defaults we set up.
 --
-main :: IO ()
 main = do
   xmproc <- spawnPipe "xmobar ~/.xmonad/xmobar.hs"
   setRandomWallpaper ["$HOME/Pictures/Wallpapers"]

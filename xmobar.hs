@@ -7,7 +7,6 @@ Config {
     font = "xft:Fixed-8",
     bgColor = "#000000",
     fgColor = "#ffffff",
-    --position = Static { xpos = 1920, ypos = 0, width = 1800, height = 16 },
     position = TopW L 100,
     lowerOnStart = True,
     commands = [
