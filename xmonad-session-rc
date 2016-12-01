@@ -37,7 +37,6 @@ xfce4-power-manager &
 
 # Start two terminals
 #gnome-terminal &
-#gnome-terminal &
 
 # Start a browser
 #google-chrome &

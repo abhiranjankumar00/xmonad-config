@@ -43,6 +43,7 @@ For source code, or to contribute, see the
         cabal-install xcompmgr
     sudo cabal update
     cabal install --global yeganesh
+    cabal install xmonad-wallpaper
 
 ### Installing requirements on [Ubuntu Linux](http://www.ubuntu.com/)
 
@@ -59,8 +60,6 @@ you may already have, cloning the git repository, and updating your PATH.
     cd
     mv .xmonad .xmonad.orig
     git clone https://github.com/vicfryzel/xmonad-config.git .xmonad
-    echo "export PATH=\$PATH:~/.cabal/bin:~/.xmonad/bin" >> ~/.bashrc
-    source ~/.bashrc
 
 Once xmonad-config is installed, you also need to ensure you can actually
 start xmonad.  The mechanism to do this varies based on each environment, but
