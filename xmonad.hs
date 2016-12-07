@@ -35,10 +35,10 @@ myScreensaver = "/usr/bin/gnome-screensaver-command --lock"
 
 -- The command to take a selective screenshot, where you select
 -- what you'd like to capture on the screen.
-mySelectScreenshot = "select-screenshot"
+mySelectScreenshot = "~/.xmonad/bin/select-screenshot"
 
 -- The command to take a fullscreen screenshot.
-myScreenshot = "screenshot"
+myScreenshot = "~/.xmonad/bin/screenshot"
 
 -- The command to use as a launcher, to launch commands that don't have
 -- preset keybindings.
