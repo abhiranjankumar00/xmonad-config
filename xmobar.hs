@@ -14,9 +14,23 @@ Config {
         Run Memory ["-t","Mem: <usedratio>%","-H","8192","-L","4096","-h","#FFB6B0","-l","#CEFFAC","-n","#FFFFCC"] 10,
         Run Swap ["-t","Swap: <usedratio>%","-H","1024","-L","512","-h","#FFB6B0","-l","#CEFFAC","-n","#FFFFCC"] 10,
         Run Date "%a %b %_d %l:%M" "date" 10,
+
+        -- Battery information. This is likely to require some customization
+        -- based upon your specific hardware. Or, for a desktop you may want
+        -- to just remove this section entirely.
+        Run Battery [
+        "-t", "<acstatus>: <left>% - <timeleft>",
+        "--",
+        --"-c", "charge_full",
+        "-O", "AC",
+        "-o", "Bat",
+        "-h", "green",
+        "-l", "red"
+        ] 10,
+
         Run StdinReader
     ],
     sepChar = "%",
     alignSep = "}{",
-    template = "%StdinReader% }{ %multicpu% | %memory% * %swap% | <fc=#FFFFCC>%date%</fc>"
+    template = "%StdinReader% }{ %multicpu% | %memory% * %swap% | %battery% | <fc=#FFFFCC>%date%</fc>"
 }
