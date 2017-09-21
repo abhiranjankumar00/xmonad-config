@@ -50,7 +50,7 @@ myLauncher = "$(yeganesh -x -- -fn '-*-terminus-*-r-normal-*-*-120-*-*-*-*-iso88
 -- The default number of workspaces (virtual screens) and their names.
 --
 myWorkspaces :: [String]
-myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:misc"] ++ map show [(6::Int)..9]
+myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:remmina", "6:keepas", "7", "8", "9"]
 
 
 ------------------------------------------------------------------------
@@ -70,14 +70,14 @@ myWorkspaces = ["1:term","2:web","3:media","4:vm", "5:misc"] ++ map show [(6::In
 myManageHook = composeAll
         [ className =? "Terminator"     --> doShift "1:term"
         , className =? "Chromium"       --> doShift "2:web"
-        , className =? "Google-chrome"  --> doShift "2:web"
+        --, className =? "Google-chrome"  --> doShift "2:web"
         , resource  =? "desktop_window" --> doIgnore
         , className =? "Galculator"     --> doFloat
         , className =? "Steam"          --> doFloat
         , className =? "Gimp"           --> doFloat
         , resource  =? "gpicview"       --> doFloat
         , className =? "MPlayer"        --> doFloat
-        , className =? "VirtualBox"     --> doShift "4:vm"
+        --, className =? "VirtualBox"     --> doShift "4:vm"
         , className =? "Xchat"          --> doShift "3:media"
         , className =? "stalonetray"    --> doIgnore
         , isFullscreen --> (doF W.focusDown <+> doFullFloat)

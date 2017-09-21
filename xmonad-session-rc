@@ -18,6 +18,9 @@ xcompmgr -n &
 # Start the system tray
 tray &
 
+# Starts tray icon for wicd-network manager
+#wicd-client -t &
+
 # Show network manager icon in tray
 if [ -x /usr/bin/nm-applet ] ; then
     nm-applet --sm-disable &
